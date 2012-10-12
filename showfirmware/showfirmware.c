@@ -195,6 +195,8 @@ efi_main (EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
              ptr = ASCII_to_UCS2(str, Strlen(str));
              Print(L"Firmware Release: %s\n", ptr);
              FreePool(ptr);
+
+             break;
         }
     }
 
