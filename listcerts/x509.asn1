@@ -1,0 +1,65 @@
+--
+-- X509 certificate
+--
+
+Certificate ::= SEQUENCE {
+    tbsCertificate          TBSCertificate,
+    signatureAlgorithm      AlgorithmIdentifier,
+    signature               BIT STRING
+}
+
+TBSCertificate ::= SEQUENCE {
+    version           [ 0 ] Version DEFAULT,
+    serialNumber            CertificateSerialNumber,
+    signature               AlgorithmIdentifier ({ do_signature }),
+    issuer                  Name ({ do_issuer }),
+    validity                Validity,
+    subject                 Name ({ do_subject }),
+    subjectPublicKeyInfo    SubjectPublicKeyInfo ({ do_subject_public_key_info }),
+    issuerUniqueID    [ 1 ] IMPLICIT UniqueIdentifier OPTIONAL,
+    subjectUniqueID   [ 2 ] IMPLICIT UniqueIdentifier OPTIONAL,
+    extensions        [ 3 ] Extensions OPTIONAL ({ do_extensions })
+}
+
+Version ::= INTEGER ({ do_version })
+
+CertificateSerialNumber ::= INTEGER ({ do_serialnumber })
+
+AlgorithmIdentifier ::= SEQUENCE {
+    algorithm		    OBJECT IDENTIFIER ({ do_algorithm }),
+    parameters		    ANY OPTIONAL
+}
+
+Name ::= SEQUENCE OF RelativeDistinguishedName
+
+RelativeDistinguishedName ::= SET OF AttributeValueAssertion
+
+AttributeValueAssertion ::= SEQUENCE {
+    attributeType           OBJECT IDENTIFIER ({ do_attribute_type }),
+    attributeValue          ANY ({ do_attribute_value })
+}
+
+Validity ::= SEQUENCE {
+    notBefore               Time ({ do_validity_not_before }),
+    notAfter                Time ({ do_validity_not_after })
+}
+
+Time ::= CHOICE {
+    utcTime                 UTCTime,
+    generalTime             GeneralizedTime
+    }
+
+SubjectPublicKeyInfo ::=  SEQUENCE {
+    algorithm		    AlgorithmIdentifier,
+    subjectPublicKey        BIT STRING
+}
+
+UniqueIdentifier ::= BIT STRING
+
+Extensions ::= SEQUENCE OF Extension
+
+Extension ::= SEQUENCE {
+    extId                   OBJECT IDENTIFIER ({ do_extension_id }),
+    critical                BOOLEAN DEFAULT,
+    extValue                OCTET STRING
+}
