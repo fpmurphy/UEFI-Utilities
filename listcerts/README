@@ -1,7 +1,7 @@
                                   README
                                  --------
 
-This utility is intended to be used from the UEFI shell prompt on an X86_64 i
+This utility is intended to be used from the UEFI shell prompt on an X86_64 
 platform that supports UEFI 2.3.1 Secure Boot.  Unless you sign this utility 
 with an appropriate key, this utility will only work on a platform where 
 Secure Boot is disabled.
