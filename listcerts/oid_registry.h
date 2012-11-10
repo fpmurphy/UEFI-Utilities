@@ -9,19 +9,25 @@
  * 2 of the Licence, or (at your option) any later version.
  */
 
+
+/*
+ *  Copyright (c) 2012 Finnbarr P. Murphy.   All rights reserved.
+ *
+ *  Modified to work in EFI environment.  Added some Microsoft OIDs
+ *
+ */
+
+
 #ifndef _OID_REGISTRY_H
 #define _OID_REGISTRY_H
-
-#include <linux/types.h>
-
-typedef long  size_t __attribute__((aligned (8)));
-
 
 /*
  * OIDs are turned into these values if possible, or OID__NR if not held here.
  *
  * NOTE!  Do not mess with the format of each line as this is read by
- *      build_OID_registry.pl to generate the data for look_up_OID().
+ *        build_oid_registry_data.pl to generate the data for Lookup_OID.
+ *
+ *        If you add or remove entries, you must rebuild oid_registry_data.c
  */
 enum OID {
     OID_id_dsa_with_sha1,          /* 1.2.840.10030.4.3 */
@@ -95,7 +101,7 @@ enum OID {
     OID__NR
 };
 
-extern enum OID Lookup_OID(const void *data, size_t datasize);
-extern int Sprint_OID(const void *, size_t, CHAR16 *, size_t);
+extern enum OID Lookup_OID(const void *data, long datasize);
+extern int Sprint_OID(const void *, long, CHAR16 *, long);
 
 #endif /* _OID_REGISTRY_H */

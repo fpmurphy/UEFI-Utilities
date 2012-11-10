@@ -9,10 +9,18 @@
  * 2 of the Licence, or (at your option) any later version.
  */
 
+/*
+ *  Copyright (c) 2012 Finnbarr P. Murphy.   All rights reserved.
+ *
+ *  Modified to work in EFI environment.
+ *
+ */
+
+
 #ifndef _ASN1_DECODER_H
 #define _ASN1_DECODER_H
 
-/* FPM  */
+/* FPM  - hack to handle any size_t issues */
 typedef long  size_t __attribute__((aligned (8)));
 #define unlikely(x) (x)
 

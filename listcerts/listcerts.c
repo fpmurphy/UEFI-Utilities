@@ -1,8 +1,14 @@
-//
-//   Copyright (c) 2012  Finnbarr P. Murphy.  All rights reserved.
-//
-//   List UEFI Secure Boot certificates.
-//
+/*
+ *  Copyright (c) 2012  Finnbarr P. Murphy.  All rights reserved.
+ *
+ *  List UEFI Secure Boot certificates.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public Licence
+ *  as published by the Free Software Foundation; either version
+ *  2 of the Licence, or (at your option) any later version.
+ */
+
 
 #include <efi.h>
 #include <efilib.h>
@@ -185,7 +191,7 @@ do_attribute_type(void *context, long state_index,
     oid = Lookup_OID(value, vlen);
     Sprint_OID(value, vlen, buffer, sizeof(buffer));
     if (oid == OID_countryName) {
-        StrCat(tmpbuf, L" CN=");
+        StrCat(tmpbuf, L" C=");
     } else if (oid == OID_stateOrProvinceName) {
         StrCat(tmpbuf, L" ST=");
     } else if (oid == OID_locality) {
@@ -285,8 +291,7 @@ do_extension_id(void *context, long state_index,
 
 
 //
-//  Yes, a hack but it works!  No support for generalizedDate
-//  Otherwise we could have to deal with tm structures, etc.
+//  Yes, a hack but it works!
 //
 char *
 make_utc_date_string(char *s)
@@ -421,8 +426,7 @@ get_variable(CHAR16 *var, UINT8 **data, UINTN *len, EFI_GUID owner)
 
     *len = 0;
 
-    efi_status = uefi_call_wrapper(RT->GetVariable, 5, var, &owner, NULL,
-                       len, NULL);
+    efi_status = uefi_call_wrapper(RT->GetVariable, 5, var, &owner, NULL, len, NULL);
     if (efi_status != EFI_BUFFER_TOO_SMALL)
         return efi_status;
 
@@ -430,9 +434,7 @@ get_variable(CHAR16 *var, UINT8 **data, UINTN *len, EFI_GUID owner)
     if (!data)
         return EFI_OUT_OF_RESOURCES;
     
-    efi_status = uefi_call_wrapper(RT->GetVariable, 5, var, &owner, NULL,
-                       len, *data);
-
+    efi_status = uefi_call_wrapper(RT->GetVariable, 5, var, &owner, NULL, len, *data);
     if (efi_status != EFI_SUCCESS) {
         FreePool(*data);
         *data = NULL;
@@ -460,6 +462,7 @@ OutputVariable(EFI_HANDLE image, CHAR16 *var, EFI_GUID owner)
 
     return status;
 }
+
 
 static void
 Usage(void)

@@ -9,6 +9,13 @@
  * 2 of the Licence, or (at your option) any later version.
  */
 
+/*
+ *  Copyright (c) 2012 Finnbarr P. Murphy.   All rights reserved.
+ *
+ *  Modified to work in EFI environment.
+ *
+ */
+
 #include <efi.h>
 #include <efilib.h>
 #include <errno.h>
@@ -118,6 +125,11 @@ next_tag:
 	dp += len;
 	goto next_tag;
 
+/* 
+ *  FPM - have not touched these messages. need to study code path.
+ *        if you get garbled output, these may be the culprits
+ * 
+ */
 length_too_long:
 	*_errmsg = "Unsupported length";
 	goto error;
@@ -173,6 +185,7 @@ int asn1_ber_decoder(const struct asn1_decoder *decoder,
 	enum asn1_opcode op;
 	unsigned char tag = 0, csp = 0, jsp = 0, optag = 0, hdr = 0;
 	const char *errmsg;
+	const CHAR16 *Errmsg = NULL;
 	size_t pc = 0, dp = 0, tdp = 0, len = 0;
 	int ret;
 
@@ -195,8 +208,6 @@ int asn1_ber_decoder(const struct asn1_decoder *decoder,
 		return -EMSGSIZE;
 
 next_op:
-//	pr_debug("next_op: pc=\e[32m%zu\e[m/%zu dp=\e[33m%zu\e[m/%zu C=%d J=%d\n",
-//		 pc, machlen, dp, datalen, csp, jsp);
 	if (unlikely(pc >= machlen))
 		goto machine_overrun_error;
 	op = machine[pc];
@@ -228,7 +239,7 @@ next_op:
 			goto long_tag_not_supported;
 
 		if (op & ASN1_OP_MATCH__ANY) {
-			// pr_debug("- any %02x\n", tag);
+			;
 		} else {
 			/* Extract the tag from the machine
 			 * - Either CONS or PRIM are permitted in the data if
@@ -241,7 +252,6 @@ next_op:
 			/* Determine whether the tag matched */
 			tmp = optag ^ tag;
 			tmp &= ~(optag & ASN1_CONS_BIT);
-			// pr_debug("- match? %02x %02x %02x\n", tag, optag, tmp);
 			if (tmp != 0) {
 				/* All odd-numbered tags are MATCH_OR_SKIP. */
 				if (op & ASN1_OP_MATCH__SKIP) {
@@ -296,8 +306,6 @@ next_op:
 			csp++;
 		}
 
-		// pr_debug("- TAG: %02x %zu%s\n",
-		//	 tag, len, flags & FLAG_CONS ? " CONS" : "");
 		tdp = dp;
 	}
 
@@ -333,7 +341,6 @@ next_op:
 			} else {
 				dp += len;
 			}
-			// pr_debug("- LEAF: %zu\n", len);
 		}
 		pc += asn1_op_lengths[op];
 		goto next_op;
@@ -341,7 +348,6 @@ next_op:
 	case ASN1_OP_MATCH_JUMP:
 	case ASN1_OP_MATCH_JUMP_OR_SKIP:
 	case ASN1_OP_COND_MATCH_JUMP_OR_SKIP:
-		// pr_debug("- MATCH_JUMP\n");
 		if (unlikely(jsp == NR_JUMP_STACK))
 			goto jump_stack_overflow;
 		jump_stack[jsp++] = pc + asn1_op_lengths[op];
@@ -356,8 +362,6 @@ next_op:
 
 	case ASN1_OP_COMPLETE:
 		if (unlikely(jsp != 0 || csp != 0)) {
-			// pr_err("ASN.1 decoder error: Stacks not empty at completion (%u, %u)\n",
-			//       jsp, csp);
 			return -EBADMSG;
 		}
 		return 0;
@@ -379,8 +383,6 @@ next_op:
 		hdr = cons_hdrlen_stack[csp];
 		len = datalen;
 		datalen = cons_datalen_stack[csp];
-		//  pr_debug("- end cons t=%zu dp=%zu l=%zu/%zu\n",
-		//	 tdp, dp, len, datalen);
 		if (datalen == 0) {
 			/* Indefinite length - check for the EOC. */
 			datalen = len;
@@ -391,7 +393,6 @@ next_op:
 					dp--;
 					csp++;
 					pc = machine[pc + 1];
-					// pr_debug("- continue\n");
 					goto next_op;
 				}
 				goto missing_eoc;
@@ -404,13 +405,11 @@ next_op:
 				datalen = len;
 				csp++;
 				pc = machine[pc + 1];
-				// pr_debug("- continue\n");
 				goto next_op;
 			}
 			if (dp != len)
 				goto cons_length_error;
 			len -= tdp;
-			// pr_debug("- cons len l=%zu d=%zu\n", len, dp - tdp);
 		}
 
 		if (op & ASN1_OP_END__ACT) {
@@ -440,52 +439,48 @@ next_op:
 	}
 
 	/* Shouldn't reach here */
-	// pr_err("ASN.1 decoder error: Found reserved opcode (%u)\n", op);
 	return -EBADMSG;
 
 data_overrun_error:
-	errmsg = "Data overrun error";
+	Errmsg = L"Data overrun error";
 	goto error;
 machine_overrun_error:
-	errmsg = "Machine overrun error";
+	Errmsg = L"Machine overrun error";
 	goto error;
 jump_stack_underflow:
-	errmsg = "Jump stack underflow";
+	Errmsg = L"Jump stack underflow";
 	goto error;
 jump_stack_overflow:
-	errmsg = "Jump stack overflow";
+	Errmsg = L"Jump stack overflow";
 	goto error;
 cons_stack_underflow:
-	errmsg = "Cons stack underflow";
+	Errmsg = L"Cons stack underflow";
 	goto error;
 cons_stack_overflow:
-	errmsg = "Cons stack overflow";
+	Errmsg = L"Cons stack overflow";
 	goto error;
 cons_length_error:
-	errmsg = "Cons length error";
+	Errmsg = L"Cons length error";
 	goto error;
 missing_eoc:
-	errmsg = "Missing EOC in indefinite len cons";
+	Errmsg = L"Missing EOC in indefinite len cons";
 	goto error;
 invalid_eoc:
-	errmsg = "Invalid length EOC";
+	Errmsg = L"Invalid length EOC";
 	goto error;
 length_too_long:
-	errmsg = "Unsupported length";
+	Errmsg = L"Unsupported length";
 	goto error;
 indefinite_len_primitive:
-	errmsg = "Indefinite len primitive not permitted";
+	Errmsg = L"Indefinite len primitive not permitted";
 	goto error;
 tag_mismatch:
-	errmsg = "Unexpected tag";
+	Errmsg = L"Unexpected tag";
 	goto error;
 long_tag_not_supported:
-	errmsg = "Long tag not supported";
+	Errmsg = L"Long tag not supported";
 error:
-        Print(L"ASN1 decomiler error\n");
-/* FPM - fix up */
-//	pr_debug("\nASN1: %s [m=%zu d=%zu ot=%02x t=%02x l=%zu]\n",
-//		 errmsg, pc, dp, optag, tag, len);
+        Print(L"ERROR: %s\n", Errmsg);
 	return -EBADMSG;
 }
 

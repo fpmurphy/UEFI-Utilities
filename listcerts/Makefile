@@ -1,5 +1,5 @@
 #
-#  Makefile for listcerts.efi
+#  Makefile for listcerts.efi.
 #
 
 TARGET     = listcerts.efi

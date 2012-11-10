@@ -11,6 +11,12 @@
 # 2 of the Licence, or (at your option) any later version.
 #
 
+#
+#  Copyright (c) Finnbarr P. Murphy.  All rights reserved.
+#
+#  Modified for listcerts build environment 
+#
+
 use strict;
 
 my @names = ();
@@ -186,19 +192,4 @@ for (my $i = 0; $i <= $#names; $i++) {
 }
 print C_FILE "};\n";
 
-#
-# Emit the OID debugging name table
-#
-#print C_FILE "\n";
-#print C_FILE "const char *const oid_name_table[OID__NR + 1] = {\n";
-#
-#for (my $i = 0; $i <= $#names; $i++) {
-#    print C_FILE "\t\"", $names[$i], "\",\n"
-#}
-#print C_FILE "\t\"Unknown-OID\"\n";
-#print C_FILE "};\n";
-
-#
-# Polish off
-#
 close C_FILE or die;
