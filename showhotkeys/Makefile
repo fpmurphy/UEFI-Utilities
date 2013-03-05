@@ -1,5 +1,5 @@
 TARGET     = showhotkeys.efi
-SRCS       = showhotkeys.c linkedlist.c
+SRCS       = showhotkeys.c efilink.c
 
 SRCDIR     = .
 PREFIX     := /usr
