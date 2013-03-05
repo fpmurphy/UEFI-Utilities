@@ -1,3 +1,9 @@
+//
+//  efilink.c
+//
+//  EFI linked list functions
+//
+
 #include <efi.h>
 #include <efilib.h>
 
